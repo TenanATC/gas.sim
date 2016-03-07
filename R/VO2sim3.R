@@ -38,29 +38,34 @@ VO2_sim<- function(a, b, system_a='parvo_2400', system_b='parvo_2400', plot = F)
     pmin(f1, f2)
   }
 
-
-
+  xs <- seq(min(mu1 - 5*sd1, mu2 - 5*sd2), max(mu1 + 5*sd1, mu2 + 5*sd2), .0001)
+  f1 <- dnorm(xs, mean=mu1, sd=sd1)
+  f2 <- dnorm(xs, mean=mu2, sd=sd2)
+  ys <- min.f1f2(xs, mu1=mu1, mu2=mu2, sd1=sd1, sd2=sd2)
 
   if (plot == F ){
     #just return integral information
-    areacurve <- integrate(min.f1f2, -Inf, Inf, mu1=mu1, mu2=mu2, sd1=sd1, sd2=sd2)
-    prob_diff <- areacurve$value*100
+    areacurve <- sum(diff(xs) * (head(ys,-1)+tail(ys,-1)))/2
+    prob_diff <- areacurve*100
 
     return(prob_diff)
   }else if (plot ==T){
     #Return the simulation data for plotting
     #this needs to be fixed so all the data will plot correctly, just do it later
-    xs <- seq(min(mu1 - 3*sd1, mu2 - 3*sd2), max(mu1 + 3*sd1, mu2 + 3*sd2), .001)
-    f1 <- dnorm(xs, mean=mu1, sd=sd1)
-    f2 <- dnorm(xs, mean=mu2, sd=sd2)
-    ys <- min.f1f2(xs, mu1=mu1, mu2=mu2, sd1=sd1, sd2=sd2)
+
     overall <- data.frame(f1,f2,xs, ys)
 
     dat_plot <-ggplot(overall, aes(x= xs, y=f1)) +
-                  geom_line() +
-                  geom_line(aes(x=xs, y=f2)) +
-                  geom_ribbon(aes(ymin =0, ymax=ys))
+      geom_line() +
+      geom_line(aes(x=xs, y=f2)) +
+      geom_ribbon(aes(ymin =0, ymax=ys)) +
+      labs(
+        x= expression('VO'[2]*' (L/min)'),
+        y= 'Probability Density'
+      ) +
+      theme(panel.background = element_rect(fill = 'white'))
 
+    #return(overall)
     return(dat_plot)
   }
 
