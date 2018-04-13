@@ -4,6 +4,8 @@
 #' based on the work by Crouter 2006
 #' Additional credit goes to Stackexchange user Wolfgang for his example code of the overlapping coefficient
 #'
+#'
+#' @import ggplot2 msm cubature
 #' @param a The first VE value obtained
 #' @param b The second VE value obtained
 #' @param system_a The system used, in quotes, to obtain measurement 'a'.
@@ -27,7 +29,7 @@ VE_sim<- function(a, b, system_a='parvo_2400', system_b='parvo_2400', plot = F){
   if (system_b == 'parvo_2400'){sd2 <- suppressWarnings(predict(VE_parvo_pred, data.frame(VE_mean = mu2)))}
   if (system_a == 'douglas_bag'){sd1 <- suppressWarnings(predict(VE_douglas_pred, data.frame(VE_mean = mu1)))}
   if (system_b == 'douglas_bag'){sd2 <- suppressWarnings(predict(VE_douglas_pred, data.frame(VE_mean = mu2)))}
-  
+
   #throw warning that algorithm is extrapolating beyond original data
   if( any(mu1 > 131 | mu2 > 131) )  warning('Algorithm extrapolating beyond original data, results may be unreliable/unstable')
 
@@ -45,15 +47,15 @@ VE_sim<- function(a, b, system_a='parvo_2400', system_b='parvo_2400', plot = F){
     #just return integral information
     areacurve <- pcubature(min.f1f2, 0, 1000, mu1=mu1, mu2=mu2, sd1=sd1, sd2=sd2, lowerb=0, fDim = 4)
     prob_diff <- areacurve[[1]][1]*100
-    
+
     #integration occasionally returns tiny negative numbers, turn them to tiny positive numbers
     if( prob_diff < 0 ){prob_diff = 0.00000000000000000000000000000001}
-    
+
     return(prob_diff)
-    
+
     #This error is known, but can't determine root cause
     if( prob_diff == 0 ) stop('Known error in cubature integration, please re-run function to return non-zero answer.')
-    
+
   }else if (plot ==T){
     #Return the simulation data for plotting
     #this needs to be fixed so all the data will plot correctly, just do it later
@@ -72,7 +74,7 @@ VE_sim<- function(a, b, system_a='parvo_2400', system_b='parvo_2400', plot = F){
         y= 'Probability Density'
       ) +
       theme(panel.background = element_rect(fill = 'white'))
-    
+
 
     return(dat_plot)
   }
